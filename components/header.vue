@@ -1,0 +1,212 @@
+<template>
+    <div class="fileHeader">
+        <div class="searchInfo">
+            <input type="text" placeholder="请输入搜索内容" v-model="searchContent" @keyup="startSearch">
+            <i class="el-icon-search" @click="startSearch"></i>
+        </div>
+        <div class="funcBtn">
+            <el-button size="mini" plain @click="uploadFile">上传文件</el-button>
+            <el-button size="mini" plain @click="$refs.batchUpload.click()">批量上传</el-button>
+            <el-button size="mini" plain @click="createdFloder">新建文件夹</el-button>
+            <el-checkbox v-model="isSelected" @change="selectedAll" class="selectedAll">全选</el-checkbox>
+            <el-button size="mini" plain @click="fixFile" >编辑</el-button>
+            <el-button size="mini" plain @click="downloadFile">下载</el-button>
+            <el-button size="mini" plain class="moveFile" @click="moveFileHandler"  >移动</el-button>
+            <el-button size="mini" plain  class="deleteFile" @click="deleteFile">删除</el-button>
+            <input type="file" class="fileInput" ref="batchUpload" @change="uploadFileHandler" style="FILTER: alpha(opacity=0); moz-opacity: 0; opacity: 0;width: 0px;height: 0px;" multiple>
+        </div>
+    </div>
+</template>
+
+<script>
+    import api from '@/api'
+    // import {mapGetters,mapMutations} from 'vuex'
+    export default {
+        data() {
+            return {
+                isShowDownlodFile: false,
+                index: 0,
+                pageAllNum: 1,
+                currentPageNum: 1,
+                searchContent: '',
+                isSelected: false
+            }
+        },
+        methods: {
+            createdFloder () {
+                this.$emit('createdFloder')
+            },
+            deleteFile () {
+               
+            },
+            uploadFile () {
+                this.$emit('uploadFile')
+            },
+            moveFileHandler () {
+                this.$emit('moveFile')
+            },
+            uploadFileHandler (e) {
+                let fileList = [...e.target.files]
+                console.log(fileList)
+                var form = new FormData()
+                fileList.forEach((item, index) => {
+                    form.append(`f${index}`, item)
+                })
+                this.$emit('batchFile', form)
+            },
+            selectedAll() {
+            },
+            fixFile () {
+                this.$emit('fixFile')
+            },
+            downloadFileHandler (item, name) {
+                api.file.downloadFile(item).then(res => {
+                    const content = res
+                    const blob = new Blob([content])
+                    const fileName = name
+                    if ('download' in document.createElement('a')) {
+                        const elink = document.createElement('a')
+                        elink.download = fileName
+                        elink.style.display = 'none'
+                        elink.href = URL.createObjectURL(blob)
+                        document.body.appendChild(elink)
+                        elink.click()
+                        URL.revokeObjectURL(elink.href) // 释放URL 对象
+                        document.body.removeChild(elink)
+                        this.index += 1
+                        this.downloadFile()
+                    }
+                }).catch(err => {
+                    console.log(err, 'oppopopop')
+                })
+            },
+            downloadFile () {
+                let ids = this.getSelectFileList.map(item => {
+                    return item.id
+                })
+                let fileNames = this.getSelectFileList.map(item => {
+                    if (item.name.includes('.')) {
+                        return item.name
+                    } else {
+                        return `${item.name}.${item.fileType}`
+                    }
+                })
+                if (!(this.index > ids.length - 1)) {
+                    this.downloadFileHandler(ids[this.index], fileNames[this.index])
+                } else {
+                    this.index = 0
+                }
+            },
+            startSearch () {
+                if (this.searchContent.trim() === '') {
+                    this.$message.error('请输入要搜索的内容！')
+                    return
+                }
+                let obj = {
+                    content: this.searchContent,
+                    time: new Date().getTime()
+                }
+                this.$store.commit('SEARCH_FILE_LIST', obj)
+            }
+        },
+        watch: {
+        },
+        created() {
+        },
+    }
+</script>
+
+<style lang="scss" type="text/scss">
+    .fileHeader{
+        .el-checkbox__label{
+            padding-left: rem(5);
+            font-size: rem(12);
+        }
+        .el-checkbox__inner{
+            margin-top: rem(2);
+            margin-right: rem(2);
+        }
+        .importFile{
+            width: 0;
+            height: 0;
+            display: none;
+        }
+    }
+</style>
+<style lang="scss" scoped type="text/scss">
+    .fileHeader{
+        width: 100%;
+        height: 100%;
+        div{
+            display: inline-block;
+        }
+        .searchInfo{
+            input{
+                border: none;
+                outline:medium;
+                border-bottom: 1px solid #ccc;
+                font-size: rem(12);
+                padding: rem(3) rem(4);
+            }
+            i{
+                font-size: rem(13);
+                margin-left: rem(-15);
+                cursor: pointer;
+            }
+        }
+        .funcBtn{
+            margin-left: rem(20);
+            margin-top: rem(0);
+            display: inline-block;
+            button{
+                border: none;
+                font-weight: 500;
+                float: left;
+                img{
+                    display: inline-block;
+                    width: rem(16);
+                    vertical-align: bottom;
+                    margin-right: rem(3);
+                }
+                i{
+                    margin-right: rem(3);
+                }
+            }
+            .el-button {
+                padding: rem(5) rem(5);
+                margin-top: rem(3);
+            }
+            .el-button.deleteFile{
+                margin-top: rem(7);
+            }
+            .el-button.moveFile{
+                margin-top: rem(4);
+            }
+        }
+        .page{
+            margin-left: rem(20);
+            font-size: rem(12);
+            float: right;
+            margin-top: rem(3);
+            span{
+                display: inline-block;
+                cursor: pointer;
+                margin-left: rem(5);
+            }
+            .upPage,downPage,listForm,cardForm{
+                padding: rem(5);
+                box-sizing: border-box;
+            }
+            .cardForm{
+                i{
+                    color: #e44b4e;
+                }
+            }
+        }
+        .selectedAll {
+            float: left;
+            margin-top: rem(7);
+            margin-left: rem(3);
+        }
+    }
+</style>

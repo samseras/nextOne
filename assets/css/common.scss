@@ -1,0 +1,69 @@
+html,
+body,
+p,
+ol,
+ul,
+li,
+dl,
+dt,
+dd,
+div,
+blockquote,
+figure,
+fieldset,
+legend,
+textarea,
+pre,
+iframe,
+hr,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-size: 100%;
+    font-weight: normal;
+}
+
+ul,li {
+    list-style: none;
+}
+
+button,
+input,
+select,
+textarea {
+    margin: 0;
+}
+a{
+    text-decoration: none;
+}
+img{
+    border: none;
+}
+body{
+    font-family: '微软雅黑';
+}
+html,body{
+    width: 100%;
+    height: 100%;
+}
+#__nuxt{
+    width: 100%;
+    height: 100%;
+}
+#__layout{
+    width: 100%;
+    height: 100%;
+}
